@@ -4,7 +4,6 @@ UCI Computer Chess Program planning to use NNUE for evaluation.
 This engine aims to implement everything without copying other engines.
 
 ## Todo
-- Basic UCI protocol
 - Board representation
 - Fen parsing
 - Move generation
@@ -20,4 +19,4 @@ This engine aims to implement everything without copying other engines.
 - NNUE
 
 ## Done
-nothing lol
+- Basic UCI protocol

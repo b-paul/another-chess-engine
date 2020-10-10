@@ -1,0 +1,69 @@
+/*
+ * This file is part of Nerd Engine
+ *
+ * Nerd Engine is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Nerd Engine is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+ * GNU General Public License for more details.
+ *
+ * You should have recieved a copy of the GNU General Public License
+ * along with Nerd Engine.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/*
+ * This file contains the UCI loop, which is used to communicate
+ * with a GUI through the UCI protocol.
+ *
+ * The UCI protocol can be found at
+ * http://wbec-ridderkerk.nl/html/UCIProtocol.html
+ */
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+
+const char version_str[] = "0.1";
+
+/* Check if a string contains a certain command */
+bool
+is_uci_command(char *str1, char *str2) {
+    return strncmp(str1, str2, strlen(str2)) == 0;
+}
+
+/* Print engine information when the uci command is parsed */
+void
+print_uci_info() {
+    printf("id name Nerd Engine %s\n", version_str);
+    printf("id author Benjamin Paul\n");
+    printf("uciok\n");
+}
+
+int
+main() {
+    /* Remove the need to flush stdio */
+    setbuf(stdin, NULL);
+    setbuf(stdout, NULL);
+
+    char str[2048];
+
+    /* UCI Loop */
+    while(fgets(str, 2048, stdin)) {
+
+        if (is_uci_command(str, "isready"))
+            printf("readyok\n");
+
+        else if (is_uci_command(str, "quit"))
+            break;
+
+        else if (is_uci_command(str, "uci"))
+            print_uci_info();
+
+    }
+
+    return 0;
+}
