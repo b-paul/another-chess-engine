@@ -1,5 +1,5 @@
 EXE=nerdengine
-SOURCE=src/main.o
+SOURCE=src/main.o src/board/board.o
 
 STANDARD_FLAGS=-O3 -Wall -Wextra -Wshadow -Werror
 CFLAGS=${STANDARD_FLAGS}
