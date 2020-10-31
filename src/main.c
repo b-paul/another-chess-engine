@@ -23,6 +23,8 @@
  * http://wbec-ridderkerk.nl/html/UCIProtocol.html
  */
 
+#include "board/defs.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,6 +45,17 @@ print_uci_info() {
     printf("uciok\n");
 }
 
+void parse_position(Board *board, char *str) {
+    clear_board(board);
+
+    str += 9;
+
+    if (is_uci_command(str, "fen"))
+        parse_fen(board, str+4);
+    else if (is_uci_command(str, "startpos"))
+        parse_fen(board, STARTING_FEN);
+}
+
 int
 main() {
     /* Remove the need to flush stdio */
@@ -50,6 +63,11 @@ main() {
     setbuf(stdout, NULL);
 
     char str[2048];
+
+    Board board;
+
+    clear_board(&board);
+    parse_fen(&board, STARTING_FEN);
 
     /* UCI Loop */
     while(fgets(str, 2048, stdin)) {
@@ -62,6 +80,14 @@ main() {
 
         else if (is_uci_command(str, "uci"))
             print_uci_info();
+
+        else if (is_uci_command(str, "position"))
+            parse_position(&board, str);
+
+#ifdef DEBUG
+        else if (is_uci_command(str, "print"))
+            print_board(&board);
+#endif
 
     }
 

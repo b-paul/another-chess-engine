@@ -16,15 +16,43 @@
  */
 #pragma once
 
-#include "../types.h"
+#include "../defs.h"
 
-#define STARTING_FEN ""
+#define STARTING_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 typedef struct {
     Bitboard pieces[PIECE_TYPE_CNT];
     Bitboard sides[TURN_CNT];
 
-    Piece board[SQ_CNT];
+    Piece mailbox[SQ_CNT];
 
     Turn turn;
+
+    /*
+     * Four bits are used to represent castling perms
+     * Bit 1 is wK, 2 is wQ, 4 is bK and 8 is bQ
+     *
+     */
+    Castling_Perm castle_perms;
+
+    Square en_pas_square;
+
+    /* Max is 50 for 50 move rule so uint8 is fine */
+    uint8_t half_move_cnt;
 } Board;
+
+enum {
+    CASTLE_WHITE_KING  = 1 << 0,
+    CASTLE_WHITE_QUEEN = 1 << 1,
+    CASTLE_BLACK_KING  = 1 << 2,
+    CASTLE_BLACK_QUEEN = 1 << 3,
+    
+    CASTLE_WHITE = CASTLE_WHITE_KING | CASTLE_WHITE_QUEEN,
+    CASTLE_BLACK = CASTLE_BLACK_KING | CASTLE_BLACK_QUEEN,
+};
+
+void clear_board(Board *board);
+void parse_fen(Board *board, const char *str);
+#ifdef DEBUG
+void print_board(Board *board);
+#endif

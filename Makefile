@@ -1,11 +1,13 @@
 EXE=nerdengine
 SOURCE=src/main.o src/board/board.o
 
-STANDARD_FLAGS=-O3 -Wall -Wextra -Wshadow -Werror
+WFLAGS=-Wall -Wextra -Wshadow -Werror
+STANDARD_FLAGS=-O3 -DNDEBUG ${WFLAGS}
+DEBUG_FLAGS=-O0 -DDEBUG ${WFLAGS}
 CFLAGS=${STANDARD_FLAGS}
 
 ${EXE}: ${SOURCE}
-	${CC} ${CFLAGS} $? -o ${EXE}
+	${CC} ${CFLAGS} ${SOURCE} -o ${EXE}
 
 all: ${EXE}
 
