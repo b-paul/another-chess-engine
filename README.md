@@ -1,7 +1,7 @@
 # Nerd-Engine
 UCI Computer Chess Program planning to use NNUE for evaluation.
 
-This engine aims to implement everything without copying other engines.
+This engine aims to implement everything without copying other engines. (except for syzygy i dont want to do that)
 
 ## Todo
 - Move generation
