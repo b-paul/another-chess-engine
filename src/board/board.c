@@ -29,7 +29,8 @@
 
 #define FEN_PARSE_ERROR (0)
 
-#define FEN_ERROR() assert(FEN_PARSE_ERROR); printf("There was an error parsing that fen\n");
+#define FEN_ERROR() assert(FEN_PARSE_ERROR); \
+    printf("There was an error parsing that fen\n");
 
 void
 clear_board(Board *board) {
