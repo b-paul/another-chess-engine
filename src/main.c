@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have recieved a copy of the GNU General Public License
- * along with Nerd Engine.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Nerd Engine.	If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -24,6 +24,7 @@
  */
 
 #include "board/defs.h"
+#include "board/helpers.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -34,62 +35,65 @@ const char version_str[] = "0.1";
 /* Check if a string contains a certain command */
 bool
 is_uci_command(char *str1, char *str2) {
-    return strncmp(str1, str2, strlen(str2)) == 0;
+	return strncmp(str1, str2, strlen(str2)) == 0;
 }
 
 /* Print engine information when the uci command is parsed */
 void
 print_uci_info() {
-    printf("id name Nerd Engine %s\n", version_str);
-    printf("id author Benjamin Paul\n");
-    printf("uciok\n");
+	printf("id name Nerd Engine %s\n", version_str);
+	printf("id author Benjamin Paul\n");
+	printf("uciok\n");
 }
 
 void parse_position(Board *board, char *str) {
-    clear_board(board);
+	clear_board(board);
 
-    str += 9;
+	str += 9;
 
-    if (is_uci_command(str, "fen"))
-        parse_fen(board, str+4);
-    else if (is_uci_command(str, "startpos"))
-        parse_fen(board, STARTING_FEN);
+	if (is_uci_command(str, "fen"))
+		parse_fen(board, str+4);
+	else if (is_uci_command(str, "startpos"))
+		parse_fen(board, STARTING_FEN);
 }
 
 int
 main() {
-    /* Remove the need to flush stdio */
-    setbuf(stdin, NULL);
-    setbuf(stdout, NULL);
 
-    char str[2048];
+	init_attacks();
 
-    Board board;
+	/* Remove the need to flush stdio */
+	setbuf(stdin, NULL);
+	setbuf(stdout, NULL);
 
-    clear_board(&board);
-    parse_fen(&board, STARTING_FEN);
+	char str[2048];
 
-    /* UCI Loop */
-    while(fgets(str, 2048, stdin)) {
+	Board board;
 
-        if (is_uci_command(str, "isready"))
-            printf("readyok\n");
+	clear_board(&board);
+	parse_fen(&board, STARTING_FEN);
 
-        else if (is_uci_command(str, "quit"))
-            break;
+	/* UCI Loop */
+	while(fgets(str, 2048, stdin)) {
 
-        else if (is_uci_command(str, "uci"))
-            print_uci_info();
+		if (is_uci_command(str, "isready"))
+			printf("readyok\n");
 
-        else if (is_uci_command(str, "position"))
-            parse_position(&board, str);
+		else if (is_uci_command(str, "quit"))
+			break;
+
+		else if (is_uci_command(str, "uci"))
+			print_uci_info();
+
+		else if (is_uci_command(str, "position"))
+			parse_position(&board, str);
 
 #ifdef DEBUG
-        else if (is_uci_command(str, "print"))
-            print_board(&board);
+		else if (is_uci_command(str, "print"))
+			print_board(&board);
 #endif
 
-    }
+	}
 
-    return 0;
+	return 0;
 }
