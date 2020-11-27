@@ -15,22 +15,57 @@
  * along with Nerd Engine.	If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
+#include <assert.h>
+
 /*
  * Helper functions
  */
 
+static inline bool
+valid_piece(Piece p) {
+	return (p >= wP && p <= wK) ||
+		   (p >= bP && p <= bK);
+}
+
+static inline bool
+valid_file(File f) {
+	return f >= FILE_A && f <= FILE_H;
+}
+
+static inline bool
+valid_rank(Rank r) {
+	return r >= RANK_1 && r <= RANK_8;
+}
+
+static inline bool
+valid_square(Square sq) {
+	return sq >= A1 && sq <= H8;
+}
+
+static inline bool
+valid_turn(Turn t) {
+	return t == WHITE || t == BLACK;
+}
+
+
+
 static inline File
 file(Square sq) {
+	assert(valid_square(sq));
 	return sq & 7;
 }
 
 static inline Rank
 rank(Square sq) {
+	assert(valid_square(sq));
 	return (sq >> 3) & 7;
 }
 
 static inline Square
 square(File f, Rank r) {
+	assert(valid_file(f));
+	assert(valid_rank(r));
 	return r << 3 | f;
 }
 
@@ -38,6 +73,7 @@ square(File f, Rank r) {
 
 static inline Piece_Type
 piece_type(Piece p) {
+	assert(valid_piece(p));
 	return p & 7;
 }
 

@@ -20,6 +20,7 @@
  */
 
 #include <stdio.h>
+#include <assert.h>
 
 #include "defs.h"
 #include "helpers.h"
@@ -63,7 +64,9 @@ init_allowed_shift_squares() {
 	}
 }
 
-/* Generating pawn, knight and king attacks is as simple as shifting a square. */
+/* 
+ * Generating pawn, knight and king attacks is as simple as shifting a square.
+ */
 
 void
 gen_pawn_attacks() {
@@ -117,13 +120,17 @@ init_attacks() {
 }
 
 Bitboard get_pawn_attacks(Square sq, Turn t) {
+	assert(valid_square(sq));
+	assert(valid_turn(t));
 	return pawn_attacks[sq][t];
 }
 
 Bitboard get_knight_attacks(Square sq) {
+	assert(valid_square(sq));
 	return knight_attacks[sq];
 }
 
 Bitboard get_king_attacks(Square sq) {
+	assert(valid_square(sq));
 	return king_attacks[sq];
 }
