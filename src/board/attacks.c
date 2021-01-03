@@ -20,6 +20,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include "defs.h"
@@ -31,6 +32,9 @@ Bitboard allowed_squares_by_dir[36];
 Bitboard pawn_attacks[SQ_CNT][TURN_CNT];
 Bitboard knight_attacks[SQ_CNT];
 Bitboard king_attacks[SQ_CNT];
+
+Magic rook_magics[SQ_CNT];
+Magic bishop_magics[SQ_CNT];
 
 /* 
  * Initialize bitboards used for shift checking
@@ -64,9 +68,7 @@ init_allowed_shift_squares() {
 	}
 }
 
-/* 
- * Generating pawn, knight and king attacks is as simple as shifting a square.
- */
+/* Non-sliding piece attacks */
 
 void
 gen_pawn_attacks() {
@@ -111,26 +113,125 @@ gen_king_attacks() {
 	}
 }
 
+/* Sliding piece attacks */
+
+/*
+ * Keep going in each direction from a square and stop when there is a piece
+ */
+Bitboard
+get_sliding_attack(Square sq, Bitboard occ, Direction dirs[4]) {
+	Bitboard r = 0ULL;
+
+	int dir_i;
+
+	for (dir_i = 0; dir_i < 4; dir_i++) {
+		Bitboard sq_bb = 1ULL << sq;
+		do {
+			sq_bb = piece_shift(sq_bb, dirs[dir_i]);
+			r |= sq_bb;
+		} while (!(sq_bb & occ) && sq_bb);
+	}
+
+	return r;
+}
+
+void
+gen_sliding_attacks() {
+	Direction bishop_dirs[4] = {
+		NORTH + EAST, NORTH + WEST, SOUTH + EAST, SOUTH + WEST
+	};
+	Direction rook_dirs[4] = {
+		NORTH, EAST, SOUTH, WEST
+	};
+
+	Square sq;
+	Bitboard occ;
+
+	init_magic_numbers();
+
+	for (sq = A1; sq <= H8; sq++) {
+
+		/* Bitboard that is used to get rid of the edges in a mask */
+		Bitboard notedges =
+			~(((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(rank(sq))) |
+			((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(file(sq))));
+
+		rook_magics[sq].mask   =
+			get_sliding_attack(sq, 0ULL, rook_dirs) & notedges;
+		bishop_magics[sq].mask =
+			get_sliding_attack(sq, 0ULL, bishop_dirs) & notedges;
+
+		rook_magics[sq].shift   = 64 - popcnt(rook_magics[sq].mask);
+		bishop_magics[sq].shift = 64 - popcnt(bishop_magics[sq].mask);
+
+		rook_magics[sq].attacks =
+			malloc((1ULL << popcnt(rook_magics[sq].mask))   * 8);
+		bishop_magics[sq].attacks =
+			malloc((1ULL << popcnt(bishop_magics[sq].mask)) * 8);
+
+		/*
+		 * This loops over all relevant occupancies and writes the attack for
+		 * that case into the attacks table
+		 */
+
+		occ = rook_magics[sq].mask;
+		do {
+			rook_magics[sq].attacks[rook_index(sq, occ)] =
+				get_sliding_attack(sq, occ, rook_dirs);
+		} while ((occ = (occ - 1) & rook_magics[sq].mask));
+
+		occ = bishop_magics[sq].mask;
+		do {
+			bishop_magics[sq].attacks[bishop_index(sq, occ)] =
+				get_sliding_attack(sq, occ, bishop_dirs);
+		} while ((occ = (occ - 1) & bishop_magics[sq].mask));
+	}
+}
+
 void
 init_attacks() {
 	init_allowed_shift_squares();
 	gen_pawn_attacks();
 	gen_knight_attacks();
 	gen_king_attacks();
+	gen_sliding_attacks();
 }
 
-Bitboard get_pawn_attacks(Square sq, Turn t) {
+Bitboard
+get_pawn_attacks(Square sq, Turn t) {
 	assert(valid_square(sq));
 	assert(valid_turn(t));
 	return pawn_attacks[sq][t];
 }
 
-Bitboard get_knight_attacks(Square sq) {
+Bitboard
+get_knight_attacks(Square sq) {
 	assert(valid_square(sq));
 	return knight_attacks[sq];
 }
 
-Bitboard get_king_attacks(Square sq) {
+Bitboard
+get_king_attacks(Square sq) {
 	assert(valid_square(sq));
 	return king_attacks[sq];
 }
+
+Bitboard
+get_rook_attacks(Square sq, Bitboard occ) {
+	assert(valid_square(sq));
+	return rook_magics[sq].attacks[rook_index(sq, occ)];
+}
+
+Bitboard
+get_bishop_attacks(Square sq, Bitboard occ) {
+	assert(valid_square(sq));
+	return bishop_magics[sq].attacks[bishop_index(sq, occ)];
+}
+
+Bitboard
+get_queen_attacks(Square sq, Bitboard occ) {
+	assert(valid_square(sq));
+	return rook_magics[sq].attacks[rook_index(sq, occ)] |
+		bishop_magics[sq].attacks[bishop_index(sq, occ)];
+}
+

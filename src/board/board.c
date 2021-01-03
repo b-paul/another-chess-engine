@@ -236,7 +236,7 @@ print_board(Board *board) {
 		} else
 			printf("|");
 	}
-	printf(" 1\n\n	A B C D E F G H\n\n");
+	printf(" 1\n\n  A B C D E F G H\n\n");
 	printf("%s to move\n\n", board->turn == WHITE ? "White" : "Black");
 }
 
@@ -252,5 +252,6 @@ print_bitboard(Bitboard b) {
 		if (i % 8 == 0)
 			printf("\n");
 	}
+    printf("\n");
 }
 #endif

@@ -37,7 +37,7 @@ ${EXE}: ${OBJECTS}
 	${CC} ${CFLAGS} ${OBJECTS} -o ${EXE}
 
 clean:
-	rm ${OBJECTS} ${EXE}
+	@$(shell rm ${OBJECTS} ${EXE})
 
 .PHONY: 
 	all debug clean

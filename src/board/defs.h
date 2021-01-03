@@ -43,6 +43,14 @@ typedef struct {
 	uint8_t half_move_cnt;
 } Board;
 
+typedef struct {
+	uint64_t magic;
+	Bitboard mask;
+	uint8_t shift;
+
+	Bitboard *attacks;
+} Magic;
+
 enum {
 	CASTLE_WHITE_KING  = 1 << 0,
 	CASTLE_WHITE_QUEEN = 1 << 1,
@@ -64,3 +72,6 @@ void init_attacks();
 Bitboard get_pawn_attacks(Square sq, Turn t);
 Bitboard get_knight_attacks(Square sq);
 Bitboard get_king_attacks(Square sq);
+Bitboard get_rook_attacks(Square sq, Bitboard occ);
+Bitboard get_bishop_attacks(Square sq, Bitboard occ);
+Bitboard get_queen_attacks(Square sq, Bitboard occ);
